@@ -216,6 +216,52 @@ VITE_API_URL=http://localhost:8000/api
 
 ---
 
+## ☁️ Deployment
+
+### Frontend: Vercel
+
+This React/Vite app can be deployed on Vercel using the root project folder.
+
+- Add `vercel.json` to the repository root.
+- Set the Vercel framework preset to `Vite` or use the detected settings.
+- Set these environment variables in Vercel if required for production:
+  - `VITE_API_URL=https://<your-backend-url>/api`
+
+No extra build step is required beyond Vercel's default `npm install` and `npm run build`.
+
+### Backend: Render
+
+The backend is configured for Render with `render.yaml` at the repo root.
+
+- Create a new Render service and connect the repository.
+- Render will use `backend` as the service root.
+- The build command is:
+
+```bash
+pip install -r requirements.txt
+```
+
+- The start command is:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+- Add the following environment variables in Render:
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `DATABASE_URL` (optional; local SQLite fallback is supported)
+  - `CORS_ORIGINS` (e.g. `["https://<your-frontend-domain>"]`)
+  - `GEMINI_API_KEY` / `GEMINI_ENDPOINT` or `OPENAI_API_KEY`
+
+### Notes
+
+- The backend uses `FastAPI` and runs on port `$PORT`.
+- The frontend should target the backend via `VITE_API_URL`.
+- If you deploy backend to `https://api.example.com`, set frontend env to `https://api.example.com/api`.
+
+---
+
 ## 📡 API Reference
 
 ### Health Check
