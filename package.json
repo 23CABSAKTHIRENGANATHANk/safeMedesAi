@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "backend:dev": "cd backend && .venv\\Scripts\\python -m uvicorn app.main:app --reload --port 8000",
+    "backend:import": "cd backend && .venv\\Scripts\\python scripts/run_import.py",
+    "start:local": "start \"Backend\" cmd /k \"cd backend && .venv\\Scripts\\python -m uvicorn app.main:app --reload --port 8000\" & start \"Frontend\" cmd /k \"npm run dev\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

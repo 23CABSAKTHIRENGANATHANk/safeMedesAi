@@ -24,6 +24,7 @@ function VerifyPage() {
   const [manufacturer, setManufacturer] = useState("");
   const [batch, setBatch] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const verifyMutation = useVerifyMedicine();
   const loading = verifyMutation.isPending;
@@ -31,6 +32,7 @@ function VerifyPage() {
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
+    setError(null);
     setResult(null);
     verifyMutation.mutate(
       {
@@ -41,6 +43,9 @@ function VerifyPage() {
       {
         onSuccess: (data) => {
           setResult(data);
+        },
+        onError: (error) => {
+          setError(error instanceof Error ? error.message : String(error));
         },
       },
     );
@@ -138,6 +143,12 @@ function VerifyPage() {
           </div>
         </form>
 
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-400/40 bg-red-500/5 p-5 text-sm text-red-700">
+            <strong>Verification failed:</strong> {error}
+          </div>
+        )}
+
         {result && result.status !== "unsafe" && (
           <div
             className={`mt-8 rounded-xl border p-6 ${
@@ -146,6 +157,23 @@ function VerifyPage() {
                 : "border-amber-500/40 bg-amber-500/5"
             }`}
           >
+            <div className="flex items-center gap-3">
+              <div
+                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
+                  result.status === "safe"
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-amber-500/10 text-amber-500"
+                }`}
+              >
+                {result.status}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {result.status === "safe"
+                  ? "No active recalls or alerts found for this medicine."
+                  : "No authoritative match found in current regulatory sources."
+                }
+              </div>
+            </div>
             <div className="flex items-start gap-4">
               {result.status === "safe" ? (
                 <ShieldCheck className="h-6 w-6 text-primary" />
@@ -161,9 +189,14 @@ function VerifyPage() {
                 <h3 className="mt-1 font-display text-xl font-semibold">{result.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {result.status === "safe"
-                    ? "This medicine returns no matching flag across CDSCO, US FDA or WHO GSMS at time of query."
-                    : "MedVerify does not have a definitive record for this entry. This is not an endorsement."}
+                    ? "This medicine was checked against current CDSCO, US FDA, and WHO GSMS records and returned no active matches."
+                    : "This query does not match an authoritative record in current regulatory sources; it may be unlisted or require manual review."}
                 </p>
+                {result.reason && (
+                  <p className="mt-3 rounded-md bg-surface p-3 text-sm text-foreground/90">
+                    {result.reason}
+                  </p>
+                )}
               </div>
             </div>
           </div>
