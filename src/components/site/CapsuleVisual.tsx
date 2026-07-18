@@ -71,16 +71,8 @@ export function CapsuleVisual({ className = "" }: { className?: string }) {
             alt="SafeMeds AI Logo"
             width={1024}
             height={1024}
-            className="relative h-full w-full object-contain rounded-2xl drop-shadow-[0_30px_60px_rgba(59,130,246,0.55)] [filter:drop-shadow(0_0_30px_rgba(78,230,184,0.35))]"
+            className="relative h-full w-full object-contain drop-shadow-[0_30px_60px_rgba(59,130,246,0.55)] [filter:drop-shadow(0_0_30px_rgba(78,230,184,0.35))]"
           />
-
-          {/* Scan sweep across logo */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-            <div className="animate-scan-vertical absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-primary-glow/60 to-transparent blur-md mix-blend-screen" />
-          </div>
-
-          {/* Glossy specular sheen overlay */}
-          <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_30%_20%,rgba(255,255,255,0.18),transparent_55%)] mix-blend-screen" />
         </div>
 
         {/* Hex particles - more of them, layered depths */}
@@ -104,12 +96,6 @@ export function CapsuleVisual({ className = "" }: { className?: string }) {
           <div className="absolute right-[10%] top-1/2 h-1.5 w-1.5 rounded-full bg-capsule-blue shadow-[0_0_12px_3px_rgba(59,130,246,0.9)]" />
         </div>
       </div>
-
-      {/* Corner HUD markers */}
-      <Corner className="left-2 top-2" />
-      <Corner className="right-2 top-2 rotate-90" />
-      <Corner className="right-2 bottom-2 rotate-180" />
-      <Corner className="left-2 bottom-2 -rotate-90" />
     </div>
   );
 }
