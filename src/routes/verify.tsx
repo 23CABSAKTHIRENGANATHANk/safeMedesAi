@@ -165,8 +165,12 @@ function VerifyPage() {
                 <div className="mono-label text-amber-500">Warning · Counterfeit Alert</div>
                 <h3 className="mt-1 font-display text-xl font-semibold">{result.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  A falsified or counterfeit version of this medicine has been detected in the market.
-                  The legitimate medicine is approved, but you should verify the source carefully.
+                  {
+                    "A falsified or counterfeit version of this medicine has been detected in the market. "
+                  }
+                  {
+                    "The legitimate medicine is approved, but you should verify the source carefully."
+                  }
                 </p>
                 {result.reason && (
                   <p className="mt-3 rounded-md bg-amber-500/10 border border-amber-500/30 p-3 text-sm text-amber-700 dark:text-amber-200">
@@ -174,9 +178,7 @@ function VerifyPage() {
                   </p>
                 )}
                 {result.authority && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Source: {result.authority}
-                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">Source: {result.authority}</p>
                 )}
               </div>
             </div>
@@ -204,8 +206,7 @@ function VerifyPage() {
               <div className="text-sm text-muted-foreground">
                 {result.status === "safe"
                   ? "No active recalls or alerts found for this medicine."
-                  : "No authoritative match found in current regulatory sources."
-                }
+                  : "No authoritative match found in current regulatory sources."}
               </div>
             </div>
             <div className="flex items-start gap-4">
