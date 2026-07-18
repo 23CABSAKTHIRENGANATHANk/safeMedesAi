@@ -66,13 +66,13 @@ function AboutPage() {
           it unsafe. That constraint is the product."
         </blockquote>
         <figcaption className="mt-8 flex items-center gap-4">
-          <div className="grid h-12 w-12 place-items-center rounded-full border border-primary/40 bg-gradient-to-br from-primary/30 to-primary/5 font-display text-lg font-bold text-primary">
-            AK
+          <div className="grid h-12 w-12 place-items-center rounded-full border border-primary/40 bg-gradient-to-br from-primary/30 to-primary/5 text-primary">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
-            <div className="font-medium text-foreground">Aditi Krishnan</div>
+            <div className="font-medium text-foreground">SafeMeds AI Core</div>
             <div className="mono-label text-muted-foreground">
-              Head of Data Integrity · MedVerify
+              Autonomous Verification Protocol
             </div>
           </div>
         </figcaption>
