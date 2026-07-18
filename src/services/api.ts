@@ -22,6 +22,15 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Fallback backend hosts to try when the primary `/api` path returns a 404 Not Found
+const FALLBACK_API_BASES = [
+  // Common Render service slugs we might have used
+  "https://safemeds-ai-backend.onrender.com/api",
+  "https://safe-meds-ai-backend.onrender.com/api",
+  "https://safe-medes-ai-backend.onrender.com/api",
+  "https://safemeds-ai.onrender.com/api",
+];
+
 export interface VerifyPayload {
   name: string;
   manufacturer?: string;
@@ -37,11 +46,42 @@ export interface Result {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const url = `${API_BASE_URL}${path}`;
+
+  const doFetch = async (u: string) => {
+    const res = await fetch(u, options);
+    return res;
+  };
+
+  let response = await doFetch(url);
+
+  // If we get a FastAPI 404 Not Found with JSON detail, try fallbacks
+  if (response.status === 404) {
+    try {
+      const body = await response.clone().json().catch(() => null);
+      if (body && typeof body.detail === "string") {
+        // Try fallback hostnames (useful when rewrite points to the wrong Render slug)
+        for (const base of FALLBACK_API_BASES) {
+          try {
+            const tryUrl = `${base.replace(/\/+$/, "")}${path}`;
+            const alt = await doFetch(tryUrl);
+            if (alt.ok) return alt.json();
+            // if alt returned 404, continue to next
+          } catch (e) {
+            // ignore and try next
+          }
+        }
+      }
+    } catch (e) {
+      // ignore parsing errors and fall through
+    }
+  }
+
   if (!response.ok) {
     const text = await response.text().catch(() => response.statusText);
     throw new Error(`API request failed (${response.status}): ${text}`);
   }
+
   return response.json();
 }
 
