@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://safemeds-ai-backend.onrender.com/api/$1"
+      "destination": "https://safe-medes-ai-backend.onrender.com/api/$1"
     },
     {
       "source": "/((?!assets/|logo.png|favicon.ico|.*\\.).*)",

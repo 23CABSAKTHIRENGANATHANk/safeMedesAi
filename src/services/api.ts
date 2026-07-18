@@ -29,6 +29,7 @@ const FALLBACK_API_BASES = [
   "https://safe-meds-ai-backend.onrender.com/api",
   "https://safe-medes-ai-backend.onrender.com/api",
   "https://safemeds-ai.onrender.com/api",
+  "https://safe-medes-ai.onrender.com/api",
 ];
 
 export interface VerifyPayload {
