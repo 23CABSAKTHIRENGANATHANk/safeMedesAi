@@ -30,4 +30,12 @@ def verify_medicine(payload: VerifyRequest, db: Session = Depends(get_db)):
         manufacturer=payload.manufacturer,
         batch=payload.batch
     )
+    if result is None:
+        result = {
+            'status': 'unknown',
+            'name': payload.name,
+            'batch': payload.batch,
+            'authority': None,
+            'reason': 'Verification service temporarily unavailable. Please try again.'
+        }
     return result

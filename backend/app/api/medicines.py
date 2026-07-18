@@ -49,11 +49,17 @@ def get_medicine(name: str = Path(..., min_length=1)):
             record = data[0]
             # aggregate related data and summarize
             alerts_res = client.table('drug_alerts').select('*').filter('title', 'ilike', f'%{name}%').limit(10).execute()
-            recalls_res = client.table('drug_recalls').select('*').filter('affected_medicine', 'ilike', f'%{name}%').limit(10).execute()
-            reports_res = client.table('reports').select('*').filter('title', 'ilike', f'%{name}%').limit(10).execute()
-            alerts = alerts_res.data if hasattr(alerts_res, 'data') else alerts_res
-            recalls = recalls_res.data if hasattr(recalls_res, 'data') else recalls_res
-            reports = reports_res.data if hasattr(reports_res, 'data') else reports_res
+            # Note: drug_recalls has no 'affected_medicine' column; search 'reason' instead
+            recalls_res = client.table('drug_recalls').select('*').filter('reason', 'ilike', f'%{name}%').limit(10).execute()
+            alerts = alerts_res.data if hasattr(alerts_res, 'data') else []
+            recalls = recalls_res.data if hasattr(recalls_res, 'data') else []
+            # reports table may not exist; wrap defensively
+            reports = []
+            try:
+                reports_res = client.table('reports').select('*').filter('title', 'ilike', f'%{name}%').limit(10).execute()
+                reports = reports_res.data if hasattr(reports_res, 'data') else []
+            except Exception:
+                reports = []
             # call OpenFDA for additional context (best-effort)
             fda_results = None
             try:

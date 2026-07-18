@@ -7,7 +7,7 @@ export interface VerifyPayload {
 }
 
 export interface Result {
-  status: "safe" | "unsafe" | "unknown";
+  status: "safe" | "unsafe" | "warning" | "unknown";
   name: string;
   batch?: string;
   authority?: string;

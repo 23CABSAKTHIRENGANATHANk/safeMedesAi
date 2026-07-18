@@ -149,7 +149,41 @@ function VerifyPage() {
           </div>
         )}
 
-        {result && result.status !== "unsafe" && (
+        {result && result.status === "warning" && (
+          <div className="mt-8 rounded-xl border border-amber-500/60 bg-amber-500/10 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] bg-amber-500/20 text-amber-500">
+                CAUTION
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Falsified/counterfeit version detected in circulation
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <ShieldQuestion className="h-6 w-6 text-amber-400 mt-1 shrink-0" />
+              <div>
+                <div className="mono-label text-amber-500">Warning · Counterfeit Alert</div>
+                <h3 className="mt-1 font-display text-xl font-semibold">{result.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A falsified or counterfeit version of this medicine has been detected in the market.
+                  The legitimate medicine is approved, but you should verify the source carefully.
+                </p>
+                {result.reason && (
+                  <p className="mt-3 rounded-md bg-amber-500/10 border border-amber-500/30 p-3 text-sm text-amber-700 dark:text-amber-200">
+                    {result.reason}
+                  </p>
+                )}
+                {result.authority && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Source: {result.authority}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {result && result.status !== "unsafe" && result.status !== "warning" && (
           <div
             className={`mt-8 rounded-xl border p-6 ${
               result.status === "safe"

@@ -4,7 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import engine, Base
+from .database import engine, Base, SessionLocal, seed_local_fallback_data
 from .scheduler import start_scheduler, stop_scheduler
 from .api.verify import router as verify_router
 from .api.medicines import router as medicines_router
@@ -14,6 +14,9 @@ logger = logging.getLogger("main")
 
 # Create tables in the database on application startup if they don't exist
 Base.metadata.create_all(bind=engine)
+
+with SessionLocal() as session:
+    seed_local_fallback_data(session)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
