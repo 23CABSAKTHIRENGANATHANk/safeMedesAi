@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://safe-medes-ai-backend.onrender.com/api/$1"
+    },
+    {
       "source": "/((?!assets/|logo.png|favicon.ico|.*\\.).*)",
       "destination": "/index.html"
     }

@@ -1,19 +1,23 @@
 const getApiBaseUrl = () => {
-  let url = import.meta.env.VITE_API_URL || "/api";
-  
-  // Clean up trailing slash
-  if (url.endsWith("/")) {
-    url = url.slice(0, -1);
+  const rawEnvUrl = import.meta.env.VITE_API_URL?.trim();
+  if (rawEnvUrl) {
+    return rawEnvUrl.replace(/\/+$/, "");
   }
-  
-  // Auto-correct spelling and append missing '/api' for Render deployments
-  if (url.includes("safemedsai.onrender.com")) {
-    url = "https://safemedesai.onrender.com/api";
-  } else if (url.includes("safemedesai.onrender.com") && !url.endsWith("/api")) {
-    url = "https://safemedesai.onrender.com/api";
+
+  if (typeof window === "undefined") {
+    return "/api";
   }
-  
-  return url;
+
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "/api";
+  }
+
+  if (hostname.endsWith("vercel.app") || hostname.endsWith("vercel.sh")) {
+    return "/api";
+  }
+
+  return "/api";
 };
 
 const API_BASE_URL = getApiBaseUrl();
