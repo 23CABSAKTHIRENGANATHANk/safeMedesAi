@@ -203,7 +203,7 @@ HOST=0.0.0.0
 # Supabase PostgreSQL connection string
 DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 
-CORS_ORIGINS=["http://localhost:5173"]
+CORS_ORIGINS=["http://localhost:5173","https://safe-medes-ai.vercel.app"]
 ```
 
 ### Frontend (`.env`)
@@ -212,7 +212,10 @@ CORS_ORIGINS=["http://localhost:5173"]
 VITE_API_URL=http://localhost:8000/api
 ```
 
-> **⚠️ Important:** Never commit `.env` files to version control. Use `.env.example` as a template.
+- Use `http://localhost:8000/api` during local development when the backend runs on port `8000`.
+- In production on Vercel, the app can use the relative API path `/api` if `vercel.json` is enabled and the backend is reachable through the rewrite.
+
+> **⚠️ Important:** Never commit `.env` files to version control. Use `backend/.env.example` as a template.
 
 ---
 
@@ -222,10 +225,9 @@ VITE_API_URL=http://localhost:8000/api
 
 This React/Vite app can be deployed on Vercel using the root project folder.
 
-- Add `vercel.json` to the repository root.
+- `vercel.json` contains a rewrite for `/api/*` to the deployed backend on Render.
 - Set the Vercel framework preset to `Vite` or use the detected settings.
-- Set these environment variables in Vercel if required for production:
-  - `VITE_API_URL=https://<your-backend-url>/api`
+- If you are not using the built-in rewrite, set `VITE_API_URL=https://<your-backend-url>/api`.
 
 No extra build step is required beyond Vercel's default `npm install` and `npm run build`.
 

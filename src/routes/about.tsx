@@ -71,9 +71,7 @@ function AboutPage() {
           </div>
           <div>
             <div className="font-medium text-foreground">SafeMeds AI Core</div>
-            <div className="mono-label text-muted-foreground">
-              Autonomous Verification Protocol
-            </div>
+            <div className="mono-label text-muted-foreground">Autonomous Verification Protocol</div>
           </div>
         </figcaption>
       </figure>
