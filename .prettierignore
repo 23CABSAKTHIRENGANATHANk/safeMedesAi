@@ -1,4 +1,14 @@
 node_modules
+.venv
+.venv-1
+backend/.venv
+backend/.venv-1
+backend/if
+backend/needed
+backend/#
+backend/node_modules
+dist
+build
 dist
 .output
 .vinxi

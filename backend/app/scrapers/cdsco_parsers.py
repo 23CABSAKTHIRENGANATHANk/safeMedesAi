@@ -13,19 +13,44 @@ log = logging.getLogger('scraper.parsers')
 def find_pdf_links_from_listing(url: str) -> List[str]:
     """Fetch a listing page and return absolute PDF links found on it.
 
-    Handles direct .pdf links and CDSCO download endpoints like
-    `download_file_division.jsp?num_id=` and links under `/Pdf-documents/`.
+    Handles direct .pdf links, CDSCO download endpoints, and follows listing pages
+    to find PDF links on linked pages if needed.
     """
     r = fetch(url)
     soup = BeautifulSoup(r.text, 'html.parser')
     links: List[str] = []
+    page_candidates: List[str] = []
+
     for a in soup.select('a'):
         href = a.get('href')
         if not href:
             continue
+        full_url = requests.compat.urljoin(url, href)
         lh = href.lower()
         if '.pdf' in lh or 'pdf-documents' in lh or 'download_file_division.jsp' in lh:
-            links.append(requests.compat.urljoin(url, href))
+            links.append(full_url)
+        elif href.startswith('/') or 'cdsco.gov.in' in href.lower():
+            page_candidates.append(full_url)
+
+    # fallback: if no direct PDF links were found, inspect linked pages for PDFs
+    if not links and page_candidates:
+        page_candidates = page_candidates[:50]
+        for page_url in page_candidates:
+            try:
+                page_resp = fetch(page_url)
+            except Exception:
+                continue
+            page_soup = BeautifulSoup(page_resp.text, 'html.parser')
+            for a in page_soup.select('a'):
+                href = a.get('href')
+                if not href:
+                    continue
+                lh = href.lower()
+                if '.pdf' in lh or 'pdf-documents' in lh or 'download_file_division.jsp' in lh:
+                    links.append(requests.compat.urljoin(page_url, href))
+            if links:
+                break
+
     logging.getLogger('scraper.parsers').info('Found %d candidate pdf links on %s', len(links), url)
     return links
 

@@ -15,7 +15,7 @@ from ..scrapers.supabase_client import get_client, upsert_who_alert
 
 log = logging.getLogger('service.who')
 
-WHO_ALERTS_URL = os.getenv('WHO_ALERTS_URL', 'https://www.who.int/medical-product-alerts')
+WHO_ALERTS_URL = os.getenv('WHO_ALERTS_URL', 'https://www.who.int/teams/regulation-prequalification/incidents-and-SF/full-list-of-who-medical-product-alerts')
 DOWNLOAD_DIR = os.getenv('WHO_DOWNLOAD_DIR', '/tmp/who_pdfs')
 
 

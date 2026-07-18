@@ -57,7 +57,10 @@ export interface RecallRecord {
 }
 
 // Reusable API services
-export async function getMedicines(page = 1, limit = 20): Promise<{ data: Medicine[]; page: number; limit: number; total?: number }> {
+export async function getMedicines(
+  page = 1,
+  limit = 20,
+): Promise<{ data: Medicine[]; page: number; limit: number; total?: number }> {
   return request(`/medicines?page=${page}&limit=${limit}`);
 }
 
@@ -65,15 +68,23 @@ export async function getMedicine(name: string): Promise<Medicine> {
   return request(`/medicine/${encodeURIComponent(name)}`);
 }
 
-export async function getAlerts(page = 1, limit = 20): Promise<{ data: AlertRecord[]; page: number; limit: number; total?: number }> {
+export async function getAlerts(
+  page = 1,
+  limit = 20,
+): Promise<{ data: AlertRecord[]; page: number; limit: number; total?: number }> {
   return request(`/alerts?page=${page}&limit=${limit}`);
 }
 
-export async function getRecalls(page = 1, limit = 20): Promise<{ data: RecallRecord[]; page: number; limit: number; total?: number }> {
+export async function getRecalls(
+  page = 1,
+  limit = 20,
+): Promise<{ data: RecallRecord[]; page: number; limit: number; total?: number }> {
   return request(`/recalls?page=${page}&limit=${limit}`);
 }
-
-export async function searchMedicines(q: string, page = 1, limit = 20): Promise<{ data: Medicine[]; page: number; limit: number; total?: number }> {
+export async function searchMedicines(
+  q: string,
+  page = 1,
+  limit = 20,
+): Promise<{ data: Medicine[]; page: number; limit: number; total?: number }> {
   return request(`/search?medicine=${encodeURIComponent(q)}&page=${page}&limit=${limit}`);
 }
-

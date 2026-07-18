@@ -13,8 +13,20 @@ def ensure_dir(path: str):
 
 def download_pdf(url: str, dest_dir: str) -> str:
     ensure_dir(dest_dir)
+    if 'download_file_division.jsp' in url.lower():
+        from bs4 import BeautifulSoup
+        import requests
+        resp = fetch(url)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        iframe = soup.find('iframe')
+        if iframe and iframe.get('src'):
+            url = requests.compat.urljoin(url, iframe.get('src'))
+            log.info('Resolved JSP division to actual PDF: %s', url)
+
     resp = fetch(url, stream=True)
     filename = os.path.basename(url.split('?')[0]) or 'download.pdf'
+    if not filename.lower().endswith('.pdf'):
+        filename = filename + '.pdf'
     safe_path = os.path.join(dest_dir, filename)
     with open(safe_path, 'wb') as f:
         for chunk in resp.iter_content(1024 * 32):

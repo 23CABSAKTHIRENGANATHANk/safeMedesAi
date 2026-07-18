@@ -27,5 +27,12 @@ npm-debug.log*
 __pycache__/
 *.pyc
 .venv/
+.venv-1/
 venv/
+backend/.venv/
+backend/.venv-1/
+backend/if/
+backend/needed/
+backend/#/
+backend/node_modules/
 ".env" 

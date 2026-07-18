@@ -3,7 +3,7 @@ import { Search, Network, ShieldCheck, FileCheck } from "lucide-react";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
-      meta: [
+    meta: [
       { title: "How It Works — MedVerify" },
       {
         name: "description",

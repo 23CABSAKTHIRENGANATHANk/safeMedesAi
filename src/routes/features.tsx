@@ -3,7 +3,7 @@ import { ShieldCheck, Bell, Database, Truck, Lock, Smartphone } from "lucide-rea
 
 export const Route = createFileRoute("/features")({
   head: () => ({
-      meta: [
+    meta: [
       { title: "Features — MedVerify" },
       {
         name: "description",

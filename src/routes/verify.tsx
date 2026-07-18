@@ -42,7 +42,7 @@ function VerifyPage() {
         onSuccess: (data) => {
           setResult(data);
         },
-      }
+      },
     );
   }
 

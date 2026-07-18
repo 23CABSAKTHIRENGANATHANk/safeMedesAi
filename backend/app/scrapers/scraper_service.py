@@ -18,10 +18,10 @@ class ScraperService:
         log.info('Starting full CDSCO scrape')
         try:
             # URLs are configurable via env vars; fallbacks are placeholders
-            approved_url = os.getenv('CDSCO_APPROVED_URL', 'https://cdsco.gov.in/approved-medicines.html')
-            alerts_url = os.getenv('CDSCO_ALERTS_URL', 'https://cdsco.gov.in/drug-alerts.html')
-            recalls_url = os.getenv('CDSCO_RECALLS_URL', 'https://cdsco.gov.in/recalls.html')
-            nsq_url = os.getenv('CDSCO_NSQ_URL', 'https://cdsco.gov.in/nsq-drugs.html')
+            approved_url = os.getenv('CDSCO_APPROVED_URL', 'https://cdsco.gov.in/opencms/opencms/en/Drugs/New-Drugs/')
+            alerts_url = os.getenv('CDSCO_ALERTS_URL', 'https://cdsco.gov.in/opencms/opencms/en/Latest-Alerts/')
+            recalls_url = os.getenv('CDSCO_RECALLS_URL', 'https://cdsco.gov.in/opencms/opencms/en/Latest-Alerts/')
+            nsq_url = os.getenv('CDSCO_NSQ_URL', 'https://cdsco.gov.in/opencms/opencms/en/Notifications/Alerts/')
 
             ingest_approved_medicines(approved_url, self.dest_dir)
             ingest_nsq(nsq_url, self.dest_dir)

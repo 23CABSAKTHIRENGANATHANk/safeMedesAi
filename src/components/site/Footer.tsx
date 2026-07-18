@@ -7,7 +7,11 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="SafeMeds AI logo" className="h-9 w-9 rounded-md border border-hairline bg-surface object-contain" />
+            <img
+              src="/logo.png"
+              alt="SafeMeds AI logo"
+              className="h-9 w-9 rounded-md border border-hairline bg-surface object-contain"
+            />
             <span className="font-display text-lg font-bold">
               <span className="text-primary">SafeMeds</span> AI
             </span>
@@ -83,7 +87,6 @@ export function Footer() {
           </div>
         </div>
       </div>
- 
     </footer>
   );
 }
