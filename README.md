@@ -214,6 +214,11 @@ VITE_API_URL=http://localhost:8000/api
 
 - Use `http://localhost:8000/api` during local development when the backend runs on port `8000`.
 - In production on Vercel, the app can use the relative API path `/api` if `vercel.json` is enabled and the backend is reachable through the rewrite.
+- If your backend is deployed at `https://safemedesai.onrender.com`, set the frontend env to:
+
+```env
+VITE_API_URL=https://safemedesai.onrender.com/api
+```
 
 > **⚠️ Important:** Never commit `.env` files to version control. Use `backend/.env.example` as a template.
 

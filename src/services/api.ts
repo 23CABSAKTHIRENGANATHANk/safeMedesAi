@@ -24,6 +24,8 @@ const API_BASE_URL = getApiBaseUrl();
 
 // Fallback backend hosts to try when the primary `/api` path returns a 404 Not Found
 const FALLBACK_API_BASES = [
+  // User-provided Render host (highest priority)
+  "https://safemedesai.onrender.com/api",
   // Common Render service slugs we might have used
   "https://safemeds-ai-backend.onrender.com/api",
   "https://safe-meds-ai-backend.onrender.com/api",
