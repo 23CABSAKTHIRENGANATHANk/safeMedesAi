@@ -194,39 +194,49 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Use different engine options for sqlite vs postgres
-if DATABASE_URL.startswith("sqlite:"):
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
-else:
-    engine = create_engine(
-        DATABASE_URL,
-        # Connection pool settings optimized for Supabase (serverless-friendly)
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,       # Verify connections are alive before use
-        pool_recycle=300,         # Recycle connections every 5 minutes to avoid timeouts
-        echo=False,               # Set to True for SQL query debugging
-    )
-
-# If a remote database is configured but unreachable, fall back to sqlite for
-# local development so the service can start. This avoids hard crashes when
-# network/DNS resolution fails during initial startup.
-if not DATABASE_URL.startswith("sqlite:"):
-    try:
-        # Quick connectivity check
-        with engine.connect() as conn:
-            pass
-    except Exception:
-        logger.exception("Failed to connect to database at %s — falling back to sqlite './dev.db'", DATABASE_URL)
-        DATABASE_URL = "sqlite:///./dev.db"
+try:
+    if DATABASE_URL.startswith("sqlite:"):
         engine = create_engine(
             DATABASE_URL,
             connect_args={"check_same_thread": False},
             echo=False,
         )
+    else:
+        # Create engine without immediate connection test
+        engine = create_engine(
+            DATABASE_URL,
+            # Connection pool settings optimized for Supabase (serverless-friendly)
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,       # Verify connections are alive before use
+            pool_recycle=300,         # Recycle connections every 5 minutes to avoid timeouts
+            echo=False,               # Set to True for SQL query debugging
+            connect_args={"connect_timeout": 10},
+        )
+        
+        # Try to connect with timeout, but don't block startup
+        try:
+            logger.info("Testing connection to PostgreSQL database...")
+            with engine.connect() as conn:
+                logger.info("✓ Successfully connected to PostgreSQL database")
+        except Exception as db_error:
+            logger.warning("⚠ Failed to connect to PostgreSQL at %s: %s", DATABASE_URL, str(db_error))
+            logger.warning("Falling back to local SQLite database for this session")
+            DATABASE_URL = "sqlite:///./dev.db"
+            engine = create_engine(
+                DATABASE_URL,
+                connect_args={"check_same_thread": False},
+                echo=False,
+            )
+except Exception as e:
+    logger.error("Fatal error creating database engine: %s", str(e))
+    logger.error("Falling back to SQLite")
+    DATABASE_URL = "sqlite:///./dev.db"
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False,
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
