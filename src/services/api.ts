@@ -1,4 +1,22 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
+const getApiBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || "/api";
+  
+  // Clean up trailing slash
+  if (url.endsWith("/")) {
+    url = url.slice(0, -1);
+  }
+  
+  // Auto-correct spelling and append missing '/api' for Render deployments
+  if (url.includes("safemedsai.onrender.com")) {
+    url = "https://safemedesai.onrender.com/api";
+  } else if (url.includes("safemedesai.onrender.com") && !url.endsWith("/api")) {
+    url = "https://safemedesai.onrender.com/api";
+  }
+  
+  return url;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface VerifyPayload {
   name: string;
