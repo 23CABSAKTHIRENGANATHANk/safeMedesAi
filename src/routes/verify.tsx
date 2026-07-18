@@ -132,6 +132,7 @@ function VerifyPage() {
                   Verify Medicine
                 </>
               )}
+            </button>
           </div>
         </form>
 
