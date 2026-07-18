@@ -132,14 +132,6 @@ function VerifyPage() {
                   Verify Medicine
                 </>
               )}
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/60 px-5 py-3 text-foreground/90 transition hover:border-primary/40 hover:text-primary"
-            >
-              <Camera className="h-4 w-4" />
-              Scan Barcode
-            </button>
           </div>
         </form>
 
