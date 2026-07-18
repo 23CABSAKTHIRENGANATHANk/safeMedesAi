@@ -36,3 +36,4 @@ backend/needed/
 backend/#/
 backend/node_modules/
 ".env" 
+datasets/drug-drugsfda-0001-of-0001.json  
