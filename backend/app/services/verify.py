@@ -36,11 +36,8 @@ class VerifyService:
             return None
 
         def search_table(table: str, field: str, query_value: str, limit: int = 5):
-            try:
-                res = client.table(table).select('*').ilike(field, query_value).limit(limit).execute()
-                return res.data if hasattr(res, 'data') else res or []
-            except Exception:
-                return []
+            res = client.table(table).select('*').ilike(field, query_value).limit(limit).execute()
+            return res.data if hasattr(res, 'data') else res or []
 
         try:
             recalls = []
