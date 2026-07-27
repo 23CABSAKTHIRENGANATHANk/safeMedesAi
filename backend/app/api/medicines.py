@@ -340,3 +340,60 @@ def get_database_counts(db: Session = Depends(get_db)):
     }
 
 
+@router.get('/api/admin/check-med/{name}')
+def check_medicine_in_databases(name: str, db: Session = Depends(get_db)):
+    sqlite_matches = db.query(MedicineRecord).filter(MedicineRecord.name.ilike(f'%{name}%')).limit(10).all()
+    sqlite_results = [
+        {
+            'name': m.name,
+            'status': m.status,
+            'authority': m.authority,
+            'reason': m.reason
+        }
+        for m in sqlite_matches
+    ]
+    
+    supabase_results = []
+    try:
+        client = get_client()
+        res = client.table('medicines').select('*').ilike('name', f'%{name}%').limit(10).execute()
+        supabase_results = res.data if hasattr(res, 'data') else res or []
+    except Exception as e:
+        supabase_results = [f"Error: {e}"]
+        
+    return {
+        "sqlite": sqlite_results,
+        "supabase": supabase_results
+    }
+
+
+@router.get('/api/admin/unsafe-examples')
+def get_unsafe_examples(db: Session = Depends(get_db)):
+    unsafe_matches = db.query(MedicineRecord).filter(MedicineRecord.status == 'unsafe').limit(15).all()
+    unsafe_results = [
+        {
+            'name': m.name,
+            'status': m.status,
+            'authority': m.authority,
+            'reason': m.reason
+        }
+        for m in unsafe_matches
+    ]
+    
+    warning_matches = db.query(MedicineRecord).filter(MedicineRecord.status == 'warning').limit(15).all()
+    warning_results = [
+        {
+            'name': m.name,
+            'status': m.status,
+            'authority': m.authority,
+            'reason': m.reason
+        }
+        for m in warning_matches
+    ]
+    
+    return {
+        "unsafe": unsafe_results,
+        "warning": warning_results
+    }
+
+
