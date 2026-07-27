@@ -14,7 +14,7 @@ class VerifyService:
         batch_clean = batch.strip() if batch else None
 
         supabase_result = VerifyService._verify_supabase(name_clean, manufacturer_clean, batch_clean)
-        if supabase_result:
+        if supabase_result and supabase_result.get("status") != "unknown":
             return supabase_result
 
         local_result = VerifyService._verify_local(db, name_clean, batch_clean)
@@ -26,7 +26,7 @@ class VerifyService:
             if manufacturer_result:
                 return manufacturer_result
 
-        return local_result
+        return supabase_result or local_result
 
     @staticmethod
     def _verify_supabase(name: str, manufacturer: Optional[str], batch: Optional[str]):
