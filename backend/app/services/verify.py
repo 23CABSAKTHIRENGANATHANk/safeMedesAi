@@ -119,19 +119,50 @@ class VerifyService:
                         }
 
             # ── Medicine lookup: try multiple field strategies ─────────────────
-            med_data = search_table('medicines', 'name', f'%{name}%')
+            # Try exact match first (case-insensitive) to utilize Postgres indexes
+            try:
+                med_res = client.table('medicines').select('*').ilike('name', name).limit(1).execute()
+                med_data = med_res.data if hasattr(med_res, 'data') else med_res or []
+            except Exception:
+                med_data = []
+
+            if not med_data:
+                # Fallback to substring search
+                med_data = search_table('medicines', 'name', f'%{name}%')
             if not med_data:
                 # Try normalized_name (lowercase)
                 med_data = search_table('medicines', 'normalized_name', f'%{name.lower()}%')
 
             if med_data:
                 first = med_data[0]
+                meta = first.get('metadata') or {}
+                
+                reason_parts = []
+                # Check for composition (stored in strength)
+                strength = first.get('strength')
+                if strength and str(strength).lower() != 'nan':
+                    reason_parts.append(f"Composition: {strength}")
+                
+                # Check metadata properties
+                price = meta.get('price')
+                side_effects = meta.get('side_effects')
+                desc = meta.get('description') or meta.get('desc')
+                
+                if price and str(price).lower() != 'nan':
+                    reason_parts.append(f"Price: Rs {price}")
+                if side_effects and str(side_effects).lower() != 'nan':
+                    reason_parts.append(f"Side Effects: {side_effects}")
+                if desc and str(desc).lower() != 'nan':
+                    reason_parts.append(f"Description: {desc}")
+                    
+                reason = " | ".join(reason_parts) if reason_parts else "Verified against current regulatory records: no active recalls or alerts found."
+                
                 return {
                     'status': 'safe',
                     'name': first.get('name') or name,
                     'batch': batch,
                     'authority': 'CDSCO / US FDA / WHO GSMS',
-                    'reason': 'Verified against current regulatory records: no active recalls or alerts found.'
+                    'reason': reason
                 }
 
             # ── Unknown: not found anywhere ───────────────────────────────────
@@ -152,65 +183,81 @@ class VerifyService:
     @staticmethod
     def _verify_local(db: Session, name: str, batch: Optional[str]):
         """Fallback local SQLite database lookup."""
-        if batch:
+        try:
+            if batch:
+                match = db.query(MedicineRecord).filter(
+                    MedicineRecord.batch == batch
+                ).first()
+                if match:
+                    return {
+                        'status': match.status,
+                        'name': name,
+                        'batch': batch,
+                        'authority': match.authority,
+                        'reason': match.reason
+                    }
+
+            # Try exact name match first (case-insensitive) to utilize the index
             match = db.query(MedicineRecord).filter(
-                MedicineRecord.batch == batch
+                MedicineRecord.name.ilike(name)
             ).first()
+
+            # Fallback to substring query if no exact match is found
+            if not match:
+                match = db.query(MedicineRecord).filter(
+                    MedicineRecord.name.ilike(f'%{name}%')
+                ).first()
+
             if match:
                 return {
                     'status': match.status,
-                    'name': name,
-                    'batch': batch,
+                    'name': match.name, # Use the clean matched name from the DB
+                    'batch': batch or match.batch,
                     'authority': match.authority,
                     'reason': match.reason
                 }
 
-        match = db.query(MedicineRecord).filter(
-            MedicineRecord.name.ilike(f'%{name}%')
-        ).first()
+            # Keyword heuristic only as absolute last resort
+            seed = name.lower()
+            if any(keyword in seed for keyword in ['banned', 'toxic', 'recall', 'fake', 'counterfeit', 'spurious']):
+                return {
+                    'status': 'unsafe',
+                    'name': name,
+                    'batch': batch,
+                    'authority': 'CDSCO',
+                    'reason': 'Name contains regulatory warning keywords — classified as unsafe by heuristic.'
+                }
 
-        if match:
             return {
-                'status': match.status,
-                'name': name,
-                'batch': batch or match.batch,
-                'authority': match.authority,
-                'reason': match.reason
-            }
-
-        # Keyword heuristic only as absolute last resort
-        seed = name.lower()
-        if any(keyword in seed for keyword in ['banned', 'toxic', 'recall', 'fake', 'counterfeit', 'spurious']):
-            return {
-                'status': 'unsafe',
+                'status': 'unknown',
                 'name': name,
                 'batch': batch,
-                'authority': 'CDSCO',
-                'reason': 'Name contains regulatory warning keywords — classified as unsafe by heuristic.'
+                'authority': None,
+                'reason': (
+                    'No authoritative record was found. '
+                    'Please double-check the medicine name, manufacturer, and batch.'
+                )
             }
-
-        return {
-            'status': 'unknown',
-            'name': name,
-            'batch': batch,
-            'authority': None,
-            'reason': (
-                'No authoritative record was found. '
-                'Please double-check the medicine name, manufacturer, and batch.'
-            )
-        }
+        except Exception as e:
+            import logging
+            logging.getLogger("verify").warning("Local SQLite database lookup failed: %s", e)
+            return None
 
     @staticmethod
     def _verify_local_by_manufacturer(db: Session, manufacturer: str):
-        match = db.query(MedicineRecord).filter(
-            MedicineRecord.manufacturer.ilike(f'%{manufacturer}%')
-        ).first()
-        if match:
-            return {
-                'status': match.status,
-                'name': match.name,
-                'batch': match.batch,
-                'authority': match.authority,
-                'reason': f'Matched manufacturer data: {match.reason}',
-            }
+        try:
+            match = db.query(MedicineRecord).filter(
+                MedicineRecord.manufacturer.ilike(f'%{manufacturer}%')
+            ).first()
+            if match:
+                return {
+                    'status': match.status,
+                    'name': match.name,
+                    'batch': match.batch,
+                    'authority': match.authority,
+                    'reason': f'Matched manufacturer data: {match.reason}',
+                }
+        except Exception as e:
+            import logging
+            logging.getLogger("verify").warning("Local SQLite manufacturer lookup failed: %s", e)
         return None

@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyResultRouteImport } from './routes/verify-result'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VerifyResultRoute = VerifyResultRouteImport.update({
+  id: '/verify-result',
+  path: '/verify-result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/verify': typeof VerifyRoute
+  '/verify-result': typeof VerifyResultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/verify': typeof VerifyRoute
+  '/verify-result': typeof VerifyResultRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/verify': typeof VerifyRoute
+  '/verify-result': typeof VerifyResultRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/features' | '/how-it-works' | '/verify'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/features'
+    | '/how-it-works'
+    | '/verify'
+    | '/verify-result'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/features' | '/how-it-works' | '/verify'
-  id: '__root__' | '/' | '/about' | '/features' | '/how-it-works' | '/verify'
+  to:
+    | '/'
+    | '/about'
+    | '/features'
+    | '/how-it-works'
+    | '/verify'
+    | '/verify-result'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/features'
+    | '/how-it-works'
+    | '/verify'
+    | '/verify-result'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +105,18 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   HowItWorksRoute: typeof HowItWorksRoute
   VerifyRoute: typeof VerifyRoute
+  VerifyResultRoute: typeof VerifyResultRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-result': {
+      id: '/verify-result'
+      path: '/verify-result'
+      fullPath: '/verify-result'
+      preLoaderRoute: typeof VerifyResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify': {
       id: '/verify'
       path: '/verify'
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   HowItWorksRoute: HowItWorksRoute,
   VerifyRoute: VerifyRoute,
+  VerifyResultRoute: VerifyResultRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

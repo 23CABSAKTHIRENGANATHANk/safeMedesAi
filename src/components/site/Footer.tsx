@@ -73,7 +73,7 @@ export function Footer() {
 
       <div className="border-t border-hairline">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-6 text-xs text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} SafeMeds AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} SafeMeds AI. All rights reserved. | Developed by Sakthi Renganathan k</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-primary">
               Privacy

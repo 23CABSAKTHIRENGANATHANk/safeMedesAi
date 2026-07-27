@@ -17,6 +17,35 @@ Base.metadata.create_all(bind=engine)
 
 with SessionLocal() as session:
     seed_local_fallback_data(session)
+    
+    # Auto-import full datasets if SQLite db is not populated
+    from .models.medicine import MedicineRecord
+    local_count = session.query(MedicineRecord).count()
+    if local_count < 1000:
+        logger.info("Local SQLite database contains only fallback records (%d). Triggering background dataset import...", local_count)
+        import threading
+        
+        def run_background_import():
+            try:
+                from backend.scripts.import_datasets import import_local_sqlite
+                import os
+                
+                # Setup paths relative to main.py
+                APP_DIR = os.path.dirname(os.path.abspath(__file__))
+                BACKEND_DIR = os.path.dirname(APP_DIR)
+                REPO_ROOT = os.path.dirname(BACKEND_DIR)
+                datasets_dir = os.path.join(REPO_ROOT, "datasets")
+                
+                if os.path.exists(datasets_dir):
+                    import_local_sqlite(datasets_dir)
+                    logger.info("Background dataset import completed successfully.")
+                else:
+                    logger.warning("Datasets directory not found at %s. Skipping import.", datasets_dir)
+            except Exception as e:
+                logger.error("Background dataset import failed: %s", e)
+                
+        threading.Thread(target=run_background_import, daemon=True).start()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -119,7 +119,14 @@ def get_medicine(name: str = Path(..., min_length=1), db: Session = Depends(get_
             if data:
                 record = data[0]
                 # minimal aggregation for fallback
-                return {'medicine': record}
+                return {
+                    'medicine': record,
+                    'alerts': [],
+                    'recalls': [],
+                    'reports': [],
+                    'fda': None,
+                    'ai_summary': None
+                }
             raise HTTPException(status_code=404, detail='medicine not found')
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -271,4 +278,65 @@ def search_medicines(
     except Exception:
         log.exception('search_medicines failed')
         raise HTTPException(status_code=500, detail='failed to search medicines')
+
+
+@router.post('/api/admin/import-datasets')
+def trigger_dataset_import(
+    supabase: bool = Query(False),
+    reset: bool = Query(False),
+    db: Session = Depends(get_db)
+):
+    try:
+        from backend.scripts.import_datasets import import_local_sqlite, import_supabase
+        import os
+        
+        # Setup paths
+        SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # api/
+        APP_DIR = os.path.dirname(SCRIPT_DIR) # app/
+        BACKEND_DIR = os.path.dirname(APP_DIR) # backend/
+        REPO_ROOT = os.path.dirname(BACKEND_DIR) # root
+        
+        datasets_dir = os.path.join(REPO_ROOT, "datasets")
+        if not os.path.exists(datasets_dir):
+            raise HTTPException(status_code=404, detail=f"Datasets directory not found at {datasets_dir}")
+            
+        import_local_sqlite(datasets_dir, reset=reset)
+        if supabase:
+            import_supabase(datasets_dir)
+            
+        return {"status": "success", "message": "Datasets imported successfully."}
+    except Exception as e:
+        log.exception("Import failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get('/api/admin/counts')
+def get_database_counts(db: Session = Depends(get_db)):
+    local_meds = db.query(MedicineRecord).count()
+    try:
+        from backend.app.models.manufacturer import Manufacturer
+        local_mfgs = db.query(Manufacturer).count()
+    except Exception:
+        local_mfgs = 0
+        
+    supabase_counts = {}
+    try:
+        client = get_client()
+        for table in ['medicines', 'manufacturers', 'drug_alerts', 'drug_recalls', 'reports']:
+            try:
+                res = client.table(table).select('*', count='exact').limit(1).execute()
+                supabase_counts[table] = res.count if hasattr(res, 'count') and res.count is not None else 0
+            except Exception as e:
+                supabase_counts[table] = f"Error: {str(e)}"
+    except Exception as e:
+        supabase_counts["error"] = str(e)
+        
+    return {
+        "local_sqlite": {
+            "medicine_records": local_meds,
+            "manufacturers": local_mfgs
+        },
+        "supabase_postgres": supabase_counts
+    }
+
 
